@@ -1,0 +1,86 @@
+---
+import { getEntry, render } from 'astro:content';
+import ExerciseRunner from '../../components/ExerciseRunner.astro';
+import VocabTable from '../../components/VocabTable.astro';
+import MainLayout from '../../layouts/MainLayout.astro';
+import { loadCurriculum } from '../../lib/content';
+import { buildMeta, lessonPrerequisites, nextLesson, orderedLessons } from '../../lib/curriculum';
+import { t } from '../../lib/i18n';
+import { href } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const { units, lessons } = await loadCurriculum();
+  const ordered = orderedLessons(lessons, units);
+  return lessons.map((lesson) => ({
+    params: { id: lesson.id },
+    props: { lesson, nextId: nextLesson(lesson.id, ordered)?.id ?? null },
+  }));
+}
+
+const { lesson, nextId } = Astro.props;
+
+const { units, lessons } = await loadCurriculum();
+const unit = units.find((candidate) => candidate.id === lesson.unitId);
+const entry = await getEntry('lessons', lesson.id);
+if (!entry) throw new Error(`No se encontró el contenido de la lección ${lesson.id}`);
+const { Content } = await render(entry);
+
+const prerequisites = lessonPrerequisites(buildMeta(units, lessons), lesson.unitId);
+const nextHref = nextId ? href(`/lecciones/${nextId}`) : null;
+---
+
+<MainLayout title={`${lesson.title.es} — ${t('app.title', 'es')}`}>
+  <article>
+    <p class="eyebrow">
+      <a href={href(`/unidades/${lesson.unitId}`)}>
+        <span data-gloss-lang="es">{unit?.title.es}</span>
+        <span data-gloss-lang="en">{unit?.title.en}</span>
+      </a>
+    </p>
+
+    <h1>
+      <span data-gloss-lang="es">{lesson.title.es}</span>
+      <span data-gloss-lang="en">{lesson.title.en}</span>
+    </h1>
+
+    <p class="card__meta">
+      <span data-gloss-lang="es">{lesson.summary.es}</span>
+      <span data-gloss-lang="en">{lesson.summary.en}</span>
+    </p>
+
+    <span class="status-badge" data-lesson-status data-i18n="state.notStarted">
+      {t('state.notStarted', 'es')}
+    </span>
+
+    <section class="card">
+      <h2 data-i18n="lesson.objectives">{t('lesson.objectives', 'es')}</h2>
+      <ul>
+        {
+          lesson.objectives.map((objective) => (
+            <li>
+              <span data-gloss-lang="es">{objective.es}</span>
+              <span data-gloss-lang="en">{objective.en}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="lesson-prose">
+      <Content />
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="lesson.vocab">{t('lesson.vocab', 'es')}</h2>
+      <VocabTable vocab={lesson.vocab} />
+    </section>
+
+    <ExerciseRunner
+      lessonId={lesson.id}
+      unitId={lesson.unitId}
+      exercises={lesson.exercises}
+      nextHref={nextHref}
+      prerequisites={prerequisites}
+    />
+  </article>
+</MainLayout>

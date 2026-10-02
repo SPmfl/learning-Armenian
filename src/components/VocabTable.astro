@@ -1,0 +1,69 @@
+---
+import { t } from '../lib/i18n';
+import type { VocabItem } from '../lib/types';
+
+interface Props {
+  vocab: VocabItem[];
+}
+
+const { vocab } = Astro.props;
+const notes = vocab.filter((item) => item.note);
+---
+
+<table class="vocab-table">
+  <thead>
+    <tr>
+      <th scope="col" data-i18n="lesson.hy">{t('lesson.hy', 'es')}</th>
+      <th scope="col" data-i18n="lesson.roman">{t('lesson.roman', 'es')}</th>
+      <th scope="col">
+        <span data-gloss-lang="es" data-i18n="lesson.es">{t('lesson.es', 'es')}</span>
+        <span data-gloss-lang="en" data-i18n="lesson.en">{t('lesson.en', 'es')}</span>
+      </th>
+      <th scope="col"><span aria-hidden="true">★</span></th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      vocab.map((item) => (
+        <tr>
+          <td class="hy">
+            {item.hy}
+            {item.note ? <sup aria-hidden="true">*</sup> : null}
+          </td>
+          <td>{item.roman}</td>
+          <td>
+            <span data-gloss-lang="es">{item.es}</span>
+            <span data-gloss-lang="en">{item.en}</span>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="vocab-table__star"
+              data-star={item.hy}
+              aria-pressed="false"
+              aria-label={t('star.add', 'es')}
+              data-i18n-aria-label="star.add">☆</button
+            >
+          </td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>
+
+{
+  notes.length > 0 && (
+    <div>
+      <h3 data-i18n="lesson.notes">{t('lesson.notes', 'es')}</h3>
+      <ul>
+        {notes.map((item) => (
+          <li>
+            <span class="hy">{item.hy}</span>:{' '}
+            <span data-gloss-lang="es">{item.note?.es}</span>
+            <span data-gloss-lang="en">{item.note?.en}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}

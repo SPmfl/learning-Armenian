@@ -1,0 +1,47 @@
+---
+import { t } from '../lib/i18n';
+import type { Exercise } from '../lib/types';
+import ArmenianKeyboard from './ArmenianKeyboard.astro';
+
+interface Props {
+  lessonId: string;
+  unitId: string;
+  exercises: Exercise[];
+  nextHref?: string | null;
+  prerequisites?: Array<{ id: string; exerciseCount: number }>;
+}
+
+const { lessonId, unitId, exercises, nextHref = null, prerequisites = [] } = Astro.props;
+
+const payload = JSON.stringify({ lessonId, unitId, exercises, nextHref, prerequisites }).replace(
+  /</g,
+  '\\u003c',
+);
+---
+
+<section class="card" aria-labelledby="exercises-heading">
+  <h2 id="exercises-heading" data-i18n="lesson.exercises">{t('lesson.exercises', 'es')}</h2>
+
+  <div class="notice notice--warn" data-lock-notice hidden>
+    <p data-i18n="state.lockedHint">{t('state.lockedHint', 'es')}</p>
+    <button type="button" class="btn btn--sm" data-bypass-lock data-i18n="action.studyAnyway">
+      {t('action.studyAnyway', 'es')}
+    </button>
+  </div>
+
+  <div id="lesson-runner" data-lesson-id={lessonId}></div>
+
+  <noscript>
+    <p class="notice">
+      Activa JavaScript para hacer los ejercicios interactivos. La explicación y el vocabulario se
+      leen igualmente.
+    </p>
+  </noscript>
+
+  <ArmenianKeyboard />
+</section>
+
+<script type="application/json" id="lesson-data" set:html={payload}></script>
+<script>
+  import '../scripts/lesson-runner.ts';
+</script>

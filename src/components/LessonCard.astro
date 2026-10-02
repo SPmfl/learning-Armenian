@@ -1,0 +1,27 @@
+---
+import { t } from '../lib/i18n';
+import { href } from '../lib/url';
+import type { LessonData } from '../lib/types';
+
+interface Props {
+  lesson: LessonData;
+}
+
+const { lesson } = Astro.props;
+---
+
+<li class="card" data-lesson-id={lesson.id}>
+  <h3>
+    <a href={href(`/lecciones/${lesson.id}`)}>
+      <span data-gloss-lang="es">{lesson.title.es}</span>
+      <span data-gloss-lang="en">{lesson.title.en}</span>
+    </a>
+  </h3>
+  <p class="card__meta">
+    <span data-gloss-lang="es">{lesson.summary.es}</span>
+    <span data-gloss-lang="en">{lesson.summary.en}</span>
+  </p>
+  <span class="status-badge" data-lesson-status data-i18n="state.notStarted">
+    {t('state.notStarted', 'es')}
+  </span>
+</li>

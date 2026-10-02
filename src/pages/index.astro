@@ -1,0 +1,62 @@
+---
+import ProgressRing from '../components/ProgressRing.astro';
+import UnitCard from '../components/UnitCard.astro';
+import MainLayout from '../layouts/MainLayout.astro';
+import { loadCurriculum } from '../lib/content';
+import { buildMeta, unitLessons } from '../lib/curriculum';
+import { t } from '../lib/i18n';
+import { href } from '../lib/url';
+
+const { units, lessons } = await loadCurriculum();
+const meta = buildMeta(units, lessons);
+const firstLessonId = lessons[0]?.id ?? '';
+const jsonMeta = JSON.stringify(meta).replace(/</g, '\\u003c');
+---
+
+<MainLayout title={`${t('app.title', 'es')} — ${t('app.tagline', 'es')}`}>
+  <section class="card">
+    <p class="eyebrow" data-i18n="app.tagline">{t('app.tagline', 'es')}</p>
+    <h1 data-i18n="app.title">{t('app.title', 'es')}</h1>
+    <p data-i18n="home.intro">{t('home.intro', 'es')}</p>
+    <p>
+      <a class="btn btn--primary" data-continue href={href(`/lecciones/${firstLessonId}`)}>
+        <span data-continue-label data-i18n="home.start">{t('home.start', 'es')}</span>
+      </a>
+    </p>
+
+    <div class="stats-grid">
+      <div class="stat">
+        <span data-global-ring>
+          <ProgressRing done={0} total={meta.lessons.length} size={64} />
+        </span>
+        <div class="stat__label" data-i18n="progress.title">{t('progress.title', 'es')}</div>
+      </div>
+      <div class="stat">
+        <div class="stat__value" data-streak-count>0</div>
+        <div class="stat__label" data-i18n="home.streak">{t('home.streak', 'es')}</div>
+      </div>
+      <div class="stat">
+        <a href={href('/abecedario')} data-i18n="home.alphabetCard">
+          {t('home.alphabetCard', 'es')}
+        </a>
+      </div>
+      <div class="stat">
+        <a href={href('/practica')} data-i18n="home.practiceCard">{t('home.practiceCard', 'es')}</a>
+      </div>
+    </div>
+  </section>
+
+  <h2 data-i18n="home.units">{t('home.units', 'es')}</h2>
+  <div class="grid grid--units">
+    {
+      units.map((unit) => (
+        <UnitCard unit={unit} lessonCount={unitLessons(unit.id, lessons).length} />
+      ))
+    }
+  </div>
+
+  <script type="application/json" id="curriculum-meta" set:html={jsonMeta}></script>
+  <script>
+    import '../scripts/progress-view.ts';
+  </script>
+</MainLayout>

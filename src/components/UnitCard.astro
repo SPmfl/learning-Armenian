@@ -1,0 +1,35 @@
+---
+import { t } from '../lib/i18n';
+import { href } from '../lib/url';
+import ProgressRing from './ProgressRing.astro';
+import type { UnitData } from '../lib/types';
+
+interface Props {
+  unit: UnitData;
+  lessonCount: number;
+}
+
+const { unit, lessonCount } = Astro.props;
+---
+
+<article class="card" data-unit-id={unit.id}>
+  <p class="eyebrow" data-i18n="lesson.unit">{t('lesson.unit', 'es')} {unit.order}</p>
+  <h3>
+    <a href={href(`/unidades/${unit.id}`)}>
+      <span data-gloss-lang="es">{unit.title.es}</span>
+      <span data-gloss-lang="en">{unit.title.en}</span>
+    </a>
+  </h3>
+  <p class="card__meta">
+    <span data-gloss-lang="es">{unit.description.es}</span>
+    <span data-gloss-lang="en">{unit.description.en}</span>
+  </p>
+  <div class="progress-ring">
+    <ProgressRing done={0} total={lessonCount} size={48} />
+  </div>
+  <p>
+    <span class="status-badge" data-unit-lock hidden data-i18n="state.locked">
+      {t('state.locked', 'es')}
+    </span>
+  </p>
+</article>

@@ -1,0 +1,13 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { t } from '../lib/i18n';
+import { href } from '../lib/url';
+---
+
+<MainLayout title={`${t('404.title', 'es')} — ${t('app.title', 'es')}`}>
+  <h1 data-i18n="404.title">{t('404.title', 'es')}</h1>
+  <p data-i18n="404.text">{t('404.text', 'es')}</p>
+  <p>
+    <a class="btn btn--primary" href={href('/')} data-i18n="404.back">{t('404.back', 'es')}</a>
+  </p>
+</MainLayout>

@@ -1,0 +1,67 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { ALPHABET, type AlphabetEntry, type AlphabetGroup } from '../data/alphabet';
+import { t } from '../lib/i18n';
+
+const groups: Array<{ id: AlphabetGroup; key: string }> = [
+  { id: 'vowel', key: 'alphabet.group.vowel' },
+  { id: 'familiar', key: 'alphabet.group.familiar' },
+  { id: 'new', key: 'alphabet.group.new' },
+];
+
+const lettersOf = (group: AlphabetGroup): AlphabetEntry[] =>
+  ALPHABET.filter((entry) => entry.group === group);
+---
+
+<MainLayout title={`${t('alphabet.title', 'es')} — ${t('app.title', 'es')}`}>
+  <h1 data-i18n="alphabet.title">{t('alphabet.title', 'es')}</h1>
+  <p data-i18n="alphabet.intro">{t('alphabet.intro', 'es')}</p>
+
+  {
+    groups.map((group) => (
+      <section>
+        <h2 data-i18n={group.key}>{t(group.key, 'es')}</h2>
+        <ul class="letter-grid">
+          {lettersOf(group.id).map((entry) => (
+            <li>
+              <details class="letter-card">
+                <summary>
+                  <span class="letter-card__glyph hy">{entry.lower}</span>
+                  <span class="letter-card__name">{entry.name}</span>
+                  <span class="letter-card__sound">
+                    <span data-gloss-lang="es">{entry.sound.es}</span>
+                    <span data-gloss-lang="en">{entry.sound.en}</span>
+                  </span>
+                </summary>
+                <dl>
+                  <dt data-i18n="alphabet.name">{t('alphabet.name', 'es')}</dt>
+                  <dd>
+                    {entry.name} · {entry.nameRoman}
+                  </dd>
+                  <dt data-i18n="lesson.roman">{t('lesson.roman', 'es')}</dt>
+                  <dd>
+                    {entry.upper} · {entry.roman} · ISO {entry.iso}
+                  </dd>
+                  {entry.value ? (
+                    <>
+                      <dt data-i18n="alphabet.value">{t('alphabet.value', 'es')}</dt>
+                      <dd>{entry.value}</dd>
+                    </>
+                  ) : null}
+                </dl>
+                {entry.note ? (
+                  <p>
+                    <span data-gloss-lang="es">{entry.note.es}</span>
+                    <span data-gloss-lang="en">{entry.note.en}</span>
+                  </p>
+                ) : null}
+              </details>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+
+  <p class="notice" data-i18n="alphabet.footnote">{t('alphabet.footnote', 'es')}</p>
+</MainLayout>

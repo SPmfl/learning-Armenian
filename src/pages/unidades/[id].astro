@@ -1,0 +1,78 @@
+---
+import LessonCard from '../../components/LessonCard.astro';
+import ProgressRing from '../../components/ProgressRing.astro';
+import MainLayout from '../../layouts/MainLayout.astro';
+import { loadCurriculum } from '../../lib/content';
+import { buildMeta, orderedUnits, unitLessons } from '../../lib/curriculum';
+import { t } from '../../lib/i18n';
+import { href } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const { units } = await loadCurriculum();
+  return units.map((unit) => ({ params: { id: unit.id }, props: { unit } }));
+}
+
+const { unit } = Astro.props;
+const { units, lessons } = await loadCurriculum();
+const list = unitLessons(unit.id, lessons);
+const meta = buildMeta(units, lessons);
+const jsonMeta = JSON.stringify(meta).replace(/</g, '\\u003c');
+
+const ordered = orderedUnits(units);
+const position = ordered.findIndex((u) => u.id === unit.id);
+const previousUnit = position > 0 ? ordered[position - 1] : null;
+const nextUnit = position >= 0 && position + 1 < ordered.length ? ordered[position + 1] : null;
+---
+
+<MainLayout title={`${unit.title.es} — ${t('app.title', 'es')}`}>
+  <p class="eyebrow" data-i18n="lesson.unit">{t('lesson.unit', 'es')} {unit.order}</p>
+
+  <div class="row-between" data-unit-id={unit.id}>
+    <h1>
+      <span data-gloss-lang="es">{unit.title.es}</span>
+      <span data-gloss-lang="en">{unit.title.en}</span>
+    </h1>
+    <ProgressRing done={0} total={list.length} size={64} />
+  </div>
+
+  <p class="card__meta">
+    <span data-gloss-lang="es">{unit.description.es}</span>
+    <span data-gloss-lang="en">{unit.description.en}</span>
+  </p>
+
+  <p>
+    <span class="status-badge" data-unit-lock hidden data-i18n="state.locked">
+      {t('state.locked', 'es')}
+    </span>
+  </p>
+
+  <ul class="list-plain">
+    {list.map((lesson) => <LessonCard lesson={lesson} />)}
+  </ul>
+
+  <nav class="row-between" aria-label="Unidades / Units">
+    {
+      previousUnit ? (
+        <a class="btn" href={href(`/unidades/${previousUnit.id}`)}>
+          ← <span data-gloss-lang="es">{previousUnit.title.es}</span>
+          <span data-gloss-lang="en">{previousUnit.title.en}</span>
+        </a>
+      ) : (
+        <span></span>
+      )
+    }
+    {
+      nextUnit && (
+        <a class="btn" href={href(`/unidades/${nextUnit.id}`)}>
+          <span data-gloss-lang="es">{nextUnit.title.es}</span>
+          <span data-gloss-lang="en">{nextUnit.title.en}</span> →
+        </a>
+      )
+    }
+  </nav>
+
+  <script type="application/json" id="curriculum-meta" set:html={jsonMeta}></script>
+  <script>
+    import '../../scripts/progress-view.ts';
+  </script>
+</MainLayout>
