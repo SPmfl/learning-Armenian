@@ -1,0 +1,46 @@
+---
+import { t } from '../lib/i18n';
+import { href } from '../lib/url';
+import LangToggle from './LangToggle.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+const links = [
+  { path: '/', key: 'nav.home' },
+  { path: '/lecciones', key: 'nav.lessons' },
+  { path: '/abecedario', key: 'nav.alphabet' },
+  { path: '/practica', key: 'nav.practice' },
+  { path: '/progreso', key: 'nav.progress' },
+  { path: '/ajustes', key: 'nav.settings' },
+];
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href={href('/')}>
+      <span class="brand__hy" aria-hidden="true">ա</span>
+      <span data-i18n="app.title">{t('app.title', 'es')}</span>
+    </a>
+
+    <nav class="site-nav" aria-label="Navegación principal / Main navigation">
+      {
+        links.map((link) => (
+          <a href={href(link.path)} data-nav-link={link.path} data-i18n={link.key}>
+            {t(link.key, 'es')}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="header-tools">
+      <span class="streak" data-streak hidden>
+        <span data-i18n="home.streak">{t('home.streak', 'es')}</span>
+        <strong data-streak-count>0</strong>
+      </span>
+      <span class="status-badge" data-progress-warning hidden data-i18n="progress.memoryShort">
+        {t('progress.memoryShort', 'es')}
+      </span>
+      <LangToggle />
+      <ThemeToggle />
+    </div>
+  </div>
+</header>

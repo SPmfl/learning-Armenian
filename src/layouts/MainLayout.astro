@@ -1,0 +1,55 @@
+---
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { href } from '../lib/url';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'Aprende armenio oriental con lecciones breves y ejercicios interactivos.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es" data-lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={href('/favicon.svg')} />
+    <script is:inline>
+      // Aplica tema e idioma antes del primer pintado para evitar destellos.
+      try {
+        var theme = localStorage.getItem('hy:theme') || 'auto';
+        var resolved =
+          theme === 'auto'
+            ? window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light'
+            : theme;
+        document.documentElement.dataset.theme = resolved;
+        if (localStorage.getItem('hy:lang') === 'en') {
+          document.documentElement.dataset.lang = 'en';
+          document.documentElement.lang = 'en';
+        }
+      } catch (error) {
+        /* almacenamiento no disponible */
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main" data-i18n="nav.skip">Saltar al contenido</a>
+    <Header />
+    <main id="main" class="container"><slot /></main>
+    <Footer />
+    <script>
+      import '../scripts/app-shell.ts';
+    </script>
+  </body>
+</html>
