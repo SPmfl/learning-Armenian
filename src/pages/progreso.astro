@@ -1,0 +1,99 @@
+---
+import ProgressRing from '../components/ProgressRing.astro';
+import MainLayout from '../layouts/MainLayout.astro';
+import { loadCurriculum } from '../lib/content';
+import { buildMeta, unitLessons } from '../lib/curriculum';
+import { t } from '../lib/i18n';
+import { href } from '../lib/url';
+
+const { units, lessons } = await loadCurriculum();
+const meta = buildMeta(units, lessons);
+const jsonMeta = JSON.stringify(meta).replace(/</g, '\\u003c');
+---
+
+<MainLayout title={`${t('progress.title', 'es')} — ${t('app.title', 'es')}`}>
+  <h1 data-i18n="progress.title">{t('progress.title', 'es')}</h1>
+
+  <div class="stats-grid">
+    <div class="stat">
+      <div class="stat__value" data-stat="streak">0</div>
+      <div class="stat__label" data-i18n="progress.streak">{t('progress.streak', 'es')}</div>
+    </div>
+    <div class="stat">
+      <div class="stat__value" data-stat="answered">0</div>
+      <div class="stat__label" data-i18n="progress.answered">{t('progress.answered', 'es')}</div>
+    </div>
+    <div class="stat">
+      <div class="stat__value" data-stat="accuracy">—</div>
+      <div class="stat__label" data-i18n="progress.accuracy">{t('progress.accuracy', 'es')}</div>
+    </div>
+    <div class="stat">
+      <div class="stat__value" data-stat="cards">0</div>
+      <div class="stat__label" data-i18n="progress.cards">{t('progress.cards', 'es')}</div>
+    </div>
+    <div class="stat">
+      <div class="stat__value" data-stat="due">0</div>
+      <div class="stat__label" data-i18n="progress.dueToday">{t('progress.dueToday', 'es')}</div>
+    </div>
+  </div>
+
+  <h2 data-i18n="progress.boxes">{t('progress.boxes', 'es')}</h2>
+  <div class="stats-grid" data-boxes></div>
+
+  <h2 data-i18n="progress.history">{t('progress.history', 'es')}</h2>
+  <div class="heatmap" data-heatmap></div>
+
+  <h2 data-i18n="home.units">{t('home.units', 'es')}</h2>
+  <div class="grid grid--units">
+    {
+      units.map((unit) => (
+        <div class="card" data-unit-id={unit.id}>
+          <h3>
+            <a href={href(`/unidades/${unit.id}`)}>
+              <span data-gloss-lang="es">{unit.title.es}</span>
+              <span data-gloss-lang="en">{unit.title.en}</span>
+            </a>
+          </h3>
+          <ProgressRing done={0} total={unitLessons(unit.id, lessons).length} size={52} />
+          <p>
+            <span class="status-badge" data-unit-lock hidden data-i18n="state.locked">
+              {t('state.locked', 'es')}
+            </span>
+          </p>
+        </div>
+      ))
+    }
+  </div>
+
+  <h2 data-i18n="settings.data">{t('settings.data', 'es')}</h2>
+  <div class="card">
+    <p
+      class="notice notice--warn"
+      data-progress-warning-full
+      hidden
+      data-i18n="progress.memoryUnavailable"
+    >
+      {t('progress.memoryUnavailable', 'es')}
+    </p>
+    <p>
+      <button class="btn" type="button" data-export data-i18n="action.export">
+        {t('action.export', 'es')}
+      </button>
+      <label class="btn">
+        <span data-i18n="action.import">{t('action.import', 'es')}</span>
+        <input type="file" accept="application/json,.json" data-import hidden />
+      </label>
+      <button class="btn btn--danger" type="button" data-reset data-i18n="action.reset">
+        {t('action.reset', 'es')}
+      </button>
+    </p>
+    <p class="muted" data-data-status role="status" aria-live="polite"></p>
+  </div>
+
+  <script type="application/json" id="curriculum-meta" set:html={jsonMeta}></script>
+  <script>
+    import '../scripts/progress-view.ts';
+    import '../scripts/progress-page.ts';
+    import '../scripts/data-controls.ts';
+  </script>
+</MainLayout>
